@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation de réponse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .ok {
+            color: green;
+        }
+        .not-ok {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Réponds à la question</h1>
+    <p>Quelle est la capitale de la France ?</p>
+    <input type="text" id="userAnswer" placeholder="Ta réponse...">
+    <button onclick="validateAnswer()">VALIDER</button>
+    <div id="result"></div>
+
+    <script>
+        function validateAnswer() {
+            const userAnswer = document.getElementById("userAnswer").value.trim().toLowerCase();
+            const resultElement = document.getElementById("result");
+
+            if (userAnswer === "paris") {
+                resultElement.textContent = "OK ! C'est la bonne réponse.";
+                resultElement.className = "ok";
+            } else {
+                resultElement.textContent = "Non, ce n'est pas la bonne réponse. Essaie encore !";
+                resultElement.className = "not-ok";
+            }
+        }
+    </script>
+</body>
+</html>
