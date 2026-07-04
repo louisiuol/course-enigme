@@ -497,7 +497,8 @@
         if (acceptedAnswers.includes(shaAnswer)) {
           messageEl.textContent = "✅ Bravo ! C'est la bonne réponse.";
           messageEl.className = "success show";
-          createExplosion();
+          // Délai de 1 seconde avant l'explosion
+          setTimeout(createExplosion, 1000);
         } else if (userWord === "") {
           messageEl.textContent = "❌ Veuillez entrer un mot.";
           messageEl.className = "error show";
