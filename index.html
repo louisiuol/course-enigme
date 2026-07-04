@@ -1,67 +1,427 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validation de réponse</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vérificateur de mot</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
+      :root {
+        --primary: #6366f1;
+        --primary-glow: rgba(99, 102, 241, 0.5);
+        --success: #10b981;
+        --success-glow: rgba(16, 185, 129, 0.5);
+        --error: #ef4444;
+        --error-glow: rgba(239, 68, 68, 0.5);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        color: #fff;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
         }
-        input[type="text"] {
-            padding: 10px;
-            width: 80%;
-            margin: 10px 0;
-            font-size: 16px;
+        50% {
+          background-position: 100% 50%;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
+        100% {
+          background-position: 0% 50%;
         }
-        button:hover {
-            background-color: #45a049;
+      }
+
+      /* Emojis flottants */
+      .emojis {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .emoji {
+        position: absolute;
+        font-size: 1.5rem;
+        opacity: 0.7;
+        transition:
+          transform 0.1s ease-out,
+          opacity 0.1s ease;
+      }
+
+      .emoji.drift {
+        animation: float 15s infinite linear;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0;
         }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
+        10% {
+          opacity: 0.7;
         }
-        .ok {
-            color: green;
+        90% {
+          opacity: 0.7;
         }
-        .not-ok {
-            color: red;
+        100% {
+          transform: translateY(-100vh) rotate(360deg);
+          opacity: 0;
         }
+      }
+
+      .container {
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+      }
+
+      h1 {
+        color: #fff;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        font-size: 2rem;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      #wordInput {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      #wordInput:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      #wordInput::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      #validateBtn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background: linear-gradient(135deg, var(--primary), #8b5cf6);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 15px var(--primary-glow);
+      }
+
+      #validateBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 25px var(--primary-glow);
+      }
+
+      #validateBtn:active {
+        transform: translateY(0);
+      }
+
+      #validateBtn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      #validateBtn:hover::before {
+        left: 100%;
+      }
+
+      #message {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        min-height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      #message.show {
+        transform: scale(1);
+        opacity: 1;
+        animation: bounce 0.5s ease;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .success {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 20px var(--success-glow);
+      }
+
+      .error {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 20px var(--error-glow);
+      }
     </style>
-</head>
-<body>
-    <h1>Réponds à la question</h1>
-    <p>Quelle est la capitale de la France ?</p>
-    <input type="text" id="userAnswer" placeholder="Ta réponse...">
-    <button onclick="validateAnswer()">VALIDER</button>
-    <div id="result"></div>
-
+  </head>
+  <body>
+    <div class="emojis" id="emojis"></div>
+    <div class="container">
+      <h1>Vérificateur de mot</h1>
+      <div class="input-group">
+        <input
+          type="text"
+          id="wordInput"
+          placeholder="Entrez un mot..."
+          autocomplete="off"
+        />
+        <button id="validateBtn">Valider</button>
+      </div>
+      <div id="message"></div>
+    </div>
     <script>
-        function validateAnswer() {
-            const userAnswer = document.getElementById("userAnswer").value.trim().toLowerCase();
-            const resultElement = document.getElementById("result");
+      const wordInput = document.getElementById("wordInput");
+      const validateBtn = document.getElementById("validateBtn");
+      const messageEl = document.getElementById("message");
+      const emojisContainer = document.getElementById("emojis");
 
-            if (userAnswer === "paris") {
-                resultElement.textContent = "OK ! C'est la bonne réponse.";
-                resultElement.className = "ok";
-            } else {
-                resultElement.textContent = "Non, ce n'est pas la bonne réponse. Essaie encore !";
-                resultElement.className = "not-ok";
-            }
+      // Mot correct à deviner
+      const correctWord = "bonjour";
+
+      // Emojis pour l'explosion
+      const explosionEmojis = [
+        "😊",
+        "😃",
+        "😍",
+        "🤩",
+        "😁",
+        "😆",
+        "🤗",
+        "🤯",
+        "👍",
+        "✅",
+        "❤️",
+        "💖",
+        "🌟",
+        "✨",
+        "🎉",
+        "💯",
+        "🥳",
+        "😎",
+        "🤘",
+        "🙌",
+      ];
+
+      let emojiElements = [];
+      let explosionActive = false;
+      let animationFrameId = null;
+
+      // Créer les emojis ❓ qui dérivent
+      function createDriftEmojis() {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
         }
+
+        emojisContainer.innerHTML = "";
+        emojiElements = [];
+        explosionActive = false;
+
+        for (let i = 0; i < 15; i++) {
+          const emoji = document.createElement("div");
+          emoji.classList.add("emoji", "drift");
+          emoji.textContent = "❓";
+          emoji.style.left = `${Math.random() * 100}%`;
+          emoji.style.top = `${Math.random() * 100 + 100}%`;
+          emoji.style.fontSize = `${0.8 + Math.random() * 1.2}rem`;
+          emoji.style.animationDelay = `${Math.random() * 15}s`;
+          emoji.style.animationDuration = `${10 + Math.random() * 10}s`;
+          emojisContainer.appendChild(emoji);
+          emojiElements.push(emoji);
+        }
+      }
+
+      // Créer une explosion de smileys
+      function createExplosion() {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+
+        emojisContainer.innerHTML = "";
+        emojiElements = [];
+        explosionActive = true;
+
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const startTime = Date.now();
+
+        for (let i = 0; i < 60; i++) {
+          const emoji = document.createElement("div");
+          emoji.classList.add("emoji");
+          emoji.textContent =
+            explosionEmojis[Math.floor(Math.random() * explosionEmojis.length)];
+
+          // Taille aléatoire
+          const size = 0.8 + Math.random() * 1.5;
+          emoji.style.fontSize = `${size}rem`;
+
+          // Position initiale au centre
+          emoji.style.left = `${centerX}px`;
+          emoji.style.top = `${centerY}px`;
+          emoji.style.transform = "translate(-50%, -50%)";
+
+          // Stockage des données de mouvement
+          emoji.dataset.vx = (Math.random() - 0.5) * 15;
+          emoji.dataset.vy = (Math.random() - 0.5) * 15 - 5; // -5 pour la gravité initiale
+          emoji.dataset.rotation = Math.random() * 360;
+          emoji.dataset.rotationSpeed = (Math.random() - 0.5) * 300;
+          emoji.dataset.startTime = startTime;
+          emoji.dataset.size = size;
+
+          emojisContainer.appendChild(emoji);
+          emojiElements.push(emoji);
+        }
+
+        animateExplosion(startTime, centerX, centerY);
+      }
+
+      // Animer l'explosion
+      function animateExplosion(startTime, centerX, centerY) {
+        const now = Date.now();
+        const elapsed = (now - startTime) / 1000;
+
+        if (elapsed >= 2) {
+          createDriftEmojis();
+          return;
+        }
+
+        emojiElements.forEach((emoji) => {
+          const vx = parseFloat(emoji.dataset.vx);
+          const vy = parseFloat(emoji.dataset.vy);
+          const rotation = parseFloat(emoji.dataset.rotation);
+          const rotationSpeed = parseFloat(emoji.dataset.rotationSpeed);
+          const size = parseFloat(emoji.dataset.size);
+
+          // Position avec gravité
+          const x = centerX + vx * elapsed * 40;
+          const y =
+            centerY + vy * elapsed * 40 + 0.5 * 9.8 * elapsed * elapsed * 40;
+
+          emoji.style.left = `${x}px`;
+          emoji.style.top = `${y}px`;
+          emoji.style.transform = `translate(-50%, -50%) rotate(${rotation + rotationSpeed * elapsed}deg) scale(${1 + elapsed * 0.2})`;
+          emoji.style.opacity = Math.max(0, 1 - elapsed / 2);
+        });
+
+        animationFrameId = requestAnimationFrame(() =>
+          animateExplosion(startTime, centerX, centerY),
+        );
+      }
+
+      validateBtn.addEventListener("click", () => {
+        const userWord = wordInput.value.trim().toLowerCase();
+
+        messageEl.classList.add("show");
+
+        if (userWord === correctWord) {
+          messageEl.textContent = "✅ Bravo ! C'est la bonne réponse.";
+          messageEl.className = "success show";
+          createExplosion();
+        } else if (userWord === "") {
+          messageEl.textContent = "❌ Veuillez entrer un mot.";
+          messageEl.className = "error show";
+        } else {
+          messageEl.textContent = "❌ Essayez encore !";
+          messageEl.className = "error show";
+        }
+      });
+
+      // Réinitialiser quand on tape
+      wordInput.addEventListener("input", () => {
+        messageEl.textContent = "";
+        messageEl.className = "";
+        if (explosionActive) {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+          }
+          createDriftEmojis();
+        }
+      });
+
+      // Initialiser
+      createDriftEmojis();
+
+      // Gérer le redimensionnement
+      window.addEventListener("resize", () => {
+        if (explosionActive) {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+          }
+          createDriftEmojis();
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
