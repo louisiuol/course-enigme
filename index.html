@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vérificateur de mot</title>
+    <title>Vérificateur de réponse</title>
     <style>
       :root {
         --primary: #6366f1;
@@ -28,7 +28,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
         margin: 0;
         padding: 2rem;
         overflow: hidden;
@@ -114,6 +115,7 @@
       }
 
       #wordInput {
+        min-width: 20px;
         flex: 1;
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -228,7 +230,7 @@
   <body>
     <div class="emojis" id="emojis"></div>
     <div class="container">
-      <h1>Vérificateur de mot</h1>
+      <h1>Vérificateur de réponse</h1>
       <div class="input-group">
         <input
           type="text"
