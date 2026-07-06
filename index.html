@@ -500,8 +500,7 @@
         if (acceptedAnswers.includes(shaAnswer)) {
           messageEl.textContent = "✅ Bravo ! C'est la bonne réponse.";
           messageEl.className = "success show";
-          // Délai de 1 seconde avant l'explosion
-          setTimeout(createExplosion, 1000);
+          createExplosion();
         } else if (userWord === "") {
           messageEl.textContent = "❌ Veuillez entrer un mot.";
           messageEl.className = "error show";
@@ -515,27 +514,10 @@
       wordInput.addEventListener("input", () => {
         messageEl.textContent = "";
         messageEl.className = "";
-        if (explosionActive) {
-          if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-          }
-          createDriftEmojis();
-        }
       });
 
       // Initialiser
       createDriftEmojis();
-
-      // Gérer le redimensionnement
-      window.addEventListener("resize", () => {
-        if (explosionActive) {
-          if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-          }
-          createDriftEmojis();
-        }
-      });
     </script>
   </body>
 </html>
